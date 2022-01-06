@@ -1,0 +1,215 @@
+no(1,"ana",[natureza,pintura,musica,sw,porto]).
+no(11,"antonio",[natureza,pintura,carros,futebol,lisboa]).
+no(12,"beatriz",[natureza,musica,carros,porto,moda]).
+no(13,"carlos",[natureza,musica,sw,futebol,coimbra]).
+no(14,"daniel",[natureza,cinema,jogos,sw,moda]).
+no(21,"eduardo",[natureza,cinema,teatro,carros,coimbra]).
+no(22,"isabel",[natureza,musica,porto,lisboa,cinema]).
+no(23,"jose",[natureza,pintura,sw,musica,carros,lisboa]).
+no(24,"luisa",[natureza,cinema,jogos,moda,porto]).
+no(31,"maria",[natureza,pintura,musica,moda,porto]).
+no(32,"anabela",[natureza,cinema,musica,tecnologia,porto]).
+no(33,"andre",[natureza,carros,futebol,coimbra]).
+no(34,"catia",[natureza,musica,cinema,lisboa,moda]).
+no(41,"cesar",[natureza,teatro,tecnologia,futebol,porto]).
+no(42,"diogo",[natureza,futebol,sw,jogos,porto]).
+no(43,"ernesto",[natureza,teatro,carros,porto]).
+no(44,"isaura",[natureza,moda,tecnologia,cinema]).
+no(200,"sara",[natureza,moda,musica,sw,coimbra]).
+
+no(51,"rodolfo",[natureza,musica,sw]).
+no(61,"rita",[moda,tecnologia,cinema]).
+
+
+ligacao(1,11,10,8).
+ligacao(1,12,2,6).
+ligacao(1,13,3,2).
+ligacao(1,14,1,5).
+ligacao(11,21,5,7).
+ligacao(11,22,2,4).
+ligacao(11,23,2,8).
+ligacao(11,24,6,0).
+ligacao(12,21,4,9).
+ligacao(12,22,3,8).
+ligacao(12,23,2,4).
+ligacao(12,24,2,4).
+ligacao(13,21,3,2).
+ligacao(13,22,0,3).
+ligacao(13,23,5,9).
+ligacao(13,24,2,4).
+ligacao(14,21,2,6).
+ligacao(14,22,6,3).
+ligacao(14,23,7,0).
+ligacao(14,24,2,2).
+ligacao(21,31,2,1).
+ligacao(21,32,2,3).
+ligacao(21,33,3,5).
+ligacao(21,34,4,2).
+ligacao(22,31,5,4).
+ligacao(22,32,1,6).
+ligacao(22,33,2,1).
+ligacao(22,34,2,3).
+ligacao(23,31,4,3).
+ligacao(23,32,3,5).
+ligacao(23,33,4,1).
+ligacao(23,34,2,3).
+ligacao(24,31,1,5).
+ligacao(24,32,1,0).
+ligacao(24,33,3,1).
+ligacao(24,34,1,5).
+ligacao(31,41,2,4).
+ligacao(31,42,6,3).
+ligacao(31,43,2,1).
+ligacao(31,44,2,1).
+ligacao(32,41,2,3).
+ligacao(32,42,1,0).
+ligacao(32,43,0,1).
+ligacao(32,44,1,2).
+ligacao(33,41,4,1).
+ligacao(33,42,1,3).
+ligacao(33,43,7,2).
+ligacao(33,44,5,3).
+ligacao(34,41,3,2).
+ligacao(34,42,1,1).
+ligacao(34,43,2,4).
+ligacao(34,44,1,2).
+ligacao(41,200,2,0).
+ligacao(42,200,7,2).
+ligacao(43,200,2,4).
+ligacao(44,200,1,3).
+
+ligacao(1,51,6,2).
+ligacao(51,61,7,3).
+ligacao(61,200,2,4).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-----Subrede de utilizadores----------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+obterMaiorForcaLigacao(Orig,N,FMax):-
+									tamanhoRedeAdaptado(Orig,N,R),
+									obterMaiorForcaLigacao2(R,FMax).
+
+obterListaDecrescenteForcasLigacao(Orig,N,LDesc):-
+									tamanhoRedeAdaptado(Orig,N,R),
+									obterListaDecrescenteForcasLigacao2(R,L1),
+									flatten(L1,L2),
+									sort(0,@>=,L2,LDesc).
+
+tamanhoRede1Adaptado(_,0,[]) :- !.
+tamanhoRede1Adaptado(Orig, Counter, LIST):-
+    no(NUM,Orig,_),
+    ((ligacao(NUM,New_User_Num,_,_));(ligacao(New_User_Num,NUM,_,_))),
+    no(New_User_Num,USER,_),
+    Counter1 is Counter-1, Counter1 >= 0,
+    tamanhoRede1Adaptado(USER,Counter1, LIST1),
+    append([USER], LIST1, LIST).
+
+
+tamanhoRedeAdaptado(Orig, Counter, LIST):-
+    findall(LIST1, tamanhoRede1Adaptado(Orig, Counter, LIST1), NEWL),
+    flatten(NEWL, LIST1),
+	sort([Orig|LIST1], LIST).
+
+
+
+obterMaiorForcaLigacao2([_],-100):- !.
+obterMaiorForcaLigacao2([H|T],FMax):-
+									obterMaiorForcaLigacao2(T,FMax1),
+									obterMaiorForcaLigacao3(H,T,FMax2),
+									((FMax2>FMax1,!,FMax = FMax2);(FMax = FMax1)).
+
+obterMaiorForcaLigacao3(_,[],-100):- !.
+obterMaiorForcaLigacao3(A,[B|T],FMax):-
+									no(NumA,A,_),
+									no(NumB,B,_),
+									(ligacao(NumA,NumB,FAB,FBA);ligacao(NumB,NumA,FBA,FAB)),
+									!,
+									obterMaiorForcaLigacao3(A,T,FMax1),
+									((FAB>FBA,!,FMax2 = FAB);(FMax2 = FBA)),
+									((FMax2>FMax1,!,FMax = FMax2);(FMax = FMax1)).
+obterMaiorForcaLigacao3(A,[_|T],FMax):-
+									obterMaiorForcaLigacao3(A,T,FMax).
+
+obterListaDecrescenteForcasLigacao2([_],[]):-!.
+obterListaDecrescenteForcasLigacao2([A|T1],[L|T2]):-
+													findall([FAB,FBA],
+															(member(B,T1),
+															no(NumA,A,_),
+															no(NumB,B,_),
+									                        (ligacao(NumA,NumB,FAB,FBA);ligacao(NumB,NumA,FBA,FAB))),
+															L),
+													obterListaDecrescenteForcasLigacao2(T1,T2).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%----- A* star -----%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+aStar(Orig,Dest,N,Cam,Custo):-
+    get_time(T1),
+
+	obterListaDecrescenteForcasLigacao(Orig,N,ListaForcas),
+
+    no(ID_Orig,Orig,_),
+    no(ID_Dest,Dest,_),
+    aStar2(ID_Dest,[(_,0,[ID_Orig])],N,Cam,Custo,ListaForcas),
+
+    write('Solucao encontrada em '),
+    get_time(T2),
+    T is T2-T1,write(T),write(' segundos'),nl.
+
+aStar2(Dest,[(_,Custo,[Dest|T])|_],_,Cam,Custo,_):-
+												!,
+												reverse([Dest|T],Cam).
+aStar2(Dest,[(_,Ca,LA)|Outros],N,Cam,Custo, ListaForcas):-
+											LA=[Act|_],
+											length(LA,Nivel),
+											findall((CEX,CaX,[X|LA]),
+													(Nivel=<N,
+													Dest\==Act,
+													(ligacao(Act,X,CustoX,_);ligacao(X,Act,_,CustoX)),
+													\+ member(X,LA),
+													CaX is CustoX + Ca,
+													estimativa_forca_ligacao(Dest,X,CustoX,ListaForcas,N,Nivel,EstX,ListaForcasSemCustoX),
+													CEX is CaX + EstX),
+													Novos),
+											append(Outros,Novos,Todos),
+											%write('Novos='),write(Novos),nl,
+                                            sort(0,@>=,Todos,TodosOrd),
+											%write('TodosOrd='),write(TodosOrd),nl,
+                                            aStar2(Dest,TodosOrd,N,Cam,Custo,ListaForcasSemCustoX).
+
+estimativa_forca_ligacao(Dest,Dest,_,_,_,_,0,_):-!.
+estimativa_forca_ligacao(_,_,CustoX,ListaForcas,NivelTotal,NivelAtual,Estimativa,ListaForcasSemCustoX):-
+	% no(Nodo1,X1,Y1),
+	% no(Nodo2,X2,Y2),
+	% Estimativa is sqrt((X1-X2)^2+(Y1-Y2)^2).
+	delete_one(CustoX,ListaForcas,ListaForcasSemCustoX),
+	Index is NivelTotal - NivelAtual,
+	take(Index, ListaForcasSemCustoX, FirstElements),
+	sum_list(FirstElements, Estimativa).
+
+  
+	
+take(N,_, Xs) :- N =< 0, !, N =:= 0, Xs = [].
+take(_, [], []).
+take(N, [X|Xs], [X|Ys]) :- M is N-1, take(M, Xs, Ys).
+
+deleteone(_, [], []).
+delete_one(Term, [Term|Tail], Tail).
+delete_one(Term, [Head|Tail], [Head|Result]) :-
+  			delete_one(Term, Tail, Result).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%------ Best First ------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
